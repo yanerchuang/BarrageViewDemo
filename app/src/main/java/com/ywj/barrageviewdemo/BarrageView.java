@@ -213,7 +213,9 @@ public class BarrageView extends FrameLayout {
     public void cancle() {
         isStart = false;
         currentIndex = 0;
-        mBarrageViewBeanList.clear();
+        if (mBarrageViewBeanList != null) {
+            mBarrageViewBeanList.clear();
+        }
         removeAllViews();
         handler.removeMessages(CODE_NEXT);
     }

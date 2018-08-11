@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/shape_barrage_item_bg"
+    android:gravity="center_vertical"
+    android:minWidth="110dp"
+    android:orientation="horizontal"
+    android:paddingBottom="1dp"
+    android:paddingLeft="1dp"
+    android:paddingRight="20dp"
+    android:paddingTop="1dp">
+
+    <ImageView
+        android:id="@+id/iv_headview"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginRight="5dp"
+        android:src="@mipmap/ic_launcher_round" />
+
+    <TextView
+        android:id="@+id/tv_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/iv_headview"
+        android:gravity="center"
+        android:maxEms="12"
+        android:singleLine="true"
+        android:text="小灰灰123056"
+        android:includeFontPadding="false"
+        android:textColor="#333"
+        android:textStyle="bold"
+        android:textSize="12sp" />
+
+    <TextView
+        android:includeFontPadding="false"
+        android:id="@+id/tv_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_content"
+        android:layout_toRightOf="@id/iv_headview"
+        android:gravity="center"
+        android:maxEms="12"
+        android:singleLine="true"
+        android:text="17:48完成"
+        android:textColor="#666"
+        android:textSize="11sp" />
+</RelativeLayout>

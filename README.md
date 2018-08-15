@@ -1,4 +1,5 @@
 ## Android属性动画弹幕，自定义弹幕布局
+[CSDN](https://blog.csdn.net/u011106915/article/details/81584046) 
 可配置项：
 
  	private int displayLines = 4;//弹幕行数

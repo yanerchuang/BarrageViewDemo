@@ -39,41 +39,46 @@ public class MainActivity extends AppCompatActivity {
         barrageView.setData(barrageViews, new BarrageView.ViewHolder() {
             @Override
             public View getItemView(Context context, Object item, final int index) {
-                BarrageViewBean barrageViewBean = (BarrageViewBean) item;
-                final RelativeLayout itemView = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.item_barrageview, null);
-                RelativeLayout.LayoutParams itemLayoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, dip2px(context, 27));
-                itemView.setLayoutParams(itemLayoutParams);
-                //设置文字//设置图片
-                TextView tvContent = itemView.findViewById(R.id.tv_content);
-                tvContent.setText(barrageViewBean.getContent());
-                TextView tvTime = itemView.findViewById(R.id.tv_time);
-                tvTime.setText(barrageViewBean.getTime());
-
-                ImageView iv = itemView.findViewById(R.id.iv_headview);
-                Glide
-                        .with(context)
-                        .load(barrageViewBean.getHeadPictureUrl())
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .dontAnimate()
-                        .override(100, 100)
-                        .error(R.mipmap.ic_launcher_round)
-                        .placeholder(R.mipmap.ic_launcher_round)
-                        .transform(new GlideCircleTransform(context))
-                        .into(iv);
-
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Log.d(TAG, "onClick: index:" + index);
-                    }
-                });
-                return itemView;
+                return getItem(context, (BarrageViewBean) item, index);
             }
         });
-        barrageView.setDisplayLines(30);
-        barrageView.setMinIntervalTime(200);
-        barrageView.setMaxIntervalTime(500);
+        barrageView.setDisplayLines(30);//设置行数
+        barrageView.setMinIntervalTime(200L);//设置最小显示间隔时间
+        barrageView.setMaxIntervalTime(500L);//设置最大显示间隔时间
+        barrageView.setAnimationTime(6000L);//设置弹幕持续时长
         barrageView.start();
+    }
+
+    private RelativeLayout getItem(Context context, BarrageViewBean item, final int index) {
+        BarrageViewBean barrageViewBean = item;
+        final RelativeLayout itemView = (RelativeLayout) LayoutInflater.from(context).inflate(R.layout.item_barrageview, null);
+        RelativeLayout.LayoutParams itemLayoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, dip2px(context, 27));
+        itemView.setLayoutParams(itemLayoutParams);
+        //设置文字//设置图片
+        TextView tvContent = itemView.findViewById(R.id.tv_content);
+        tvContent.setText(barrageViewBean.getContent());
+        TextView tvTime = itemView.findViewById(R.id.tv_time);
+        tvTime.setText(barrageViewBean.getTime());
+
+        ImageView iv = itemView.findViewById(R.id.iv_headview);
+        Glide
+                .with(context)
+                .load(barrageViewBean.getHeadPictureUrl())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .dontAnimate()
+                .override(100, 100)
+                .error(R.mipmap.ic_launcher_round)
+                .placeholder(R.mipmap.ic_launcher_round)
+                .transform(new GlideCircleTransform(context))
+                .into(iv);
+
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: index:" + index);
+            }
+        });
+        return itemView;
     }
 
     @Override

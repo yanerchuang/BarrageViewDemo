@@ -8,45 +8,52 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.List;
 
 /**
- * 弹幕，使用属性动画
+ * 弹幕视图，使用属性动画
  */
 public class BarrageView extends FrameLayout {
     private String Tag = BarrageView.class.getSimpleName();
 
-    private List<BarrageViewBean> mBarrageViewBeanList; //数据源
-    private int barrageViewWidth;    //控件宽
-    private int barrageViewHeight;  //控件高
-    private RelativeLayout.LayoutParams itemLayoutParams;
-
-    private int displayLines = 4;//弹幕行数
-    private boolean isRepeat = true;//是否循环显示
-
-    private long animationTime = 6 * 1000L; //动画时间
-    private long distanceTime = 3 * 1000L; //两条弹幕间隔时间
-    private boolean isRandomDistanTime = true; //是否随机间隔时间
-
-    private int currentIndex; //大当前弹幕索引
-    private boolean isStart;//弹幕状态
-
-
-    private int lastLine; //上一次出现的行数
-
     private final int CODE_START = 1000;
     private final int CODE_NEXT = 1001;
     private final int CODE_END = 1002;
+
+    //数据源
+    private List<?> datas;
+    private ViewHolder viewHolder;
+    //控件宽
+    private int barrageViewWidth;
+    //控件高
+    private int barrageViewHeight;
+
+
+    //弹幕行数
+    private int displayLines = 10;
+    //是否循环显示
+    private boolean isRepeat = true;
+    //动画时间
+    private long animationTime = 6 * 1000L;
+
+    //两条弹幕最小间隔时间
+    private long minIntervalTime = 1000L;
+    //两条弹幕最大间隔时间
+    private long maxIntervalTime = 3000L;
+
+
+    //大当前弹幕索引
+    private int currentIndex;
+
+    //弹幕状态
+    private boolean isStart;
+
+    //上一次出现的行数
+    private int lastLine = -1;
 
 
     @SuppressLint("HandlerLeak")
@@ -58,16 +65,11 @@ public class BarrageView extends FrameLayout {
                     handler.sendEmptyMessage(CODE_NEXT);
                     break;
                 case CODE_NEXT:
-                    if (isStart && mBarrageViewBeanList != null && currentIndex < mBarrageViewBeanList.size()) {
-                        BarrageViewBean item = mBarrageViewBeanList.get(currentIndex);
-                        addView(item);
+                    if (isStart && datas != null && currentIndex < datas.size()) {
+                        addView();
                         currentIndex++;
-                        long randomSleepTime;
-                        if (isRandomDistanTime) {
-                            randomSleepTime = (long) (Math.random() * 5 + 3) * 200L;
-                        } else {
-                            randomSleepTime = distanceTime;
-                        }
+                        long interval = maxIntervalTime - minIntervalTime;
+                        long randomSleepTime =  minIntervalTime + (long)(interval > 0 ? Math.random() * interval : 0);
                         handler.sendEmptyMessageDelayed(CODE_NEXT, randomSleepTime);
                     } else {
                         handler.sendEmptyMessage(CODE_END);
@@ -93,36 +95,13 @@ public class BarrageView extends FrameLayout {
     }
 
 
-    private void addView(BarrageViewBean barrageViewBean) {
-        final RelativeLayout itemView = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.item_barrageview, null);
-        if (itemLayoutParams == null) {
-            itemLayoutParams = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, dip2px(getContext(), 27));
-        }
-        itemView.setLayoutParams(itemLayoutParams);
-        itemView.setY(getItemRamdomY());
+    private void addView() {
+        final View itemView = viewHolder.getItemView(getContext(), datas.get(currentIndex), currentIndex);
+        addView(itemView);
+        itemView.setY(getItemRandomY());
         itemView.measure(0, 0);
         int itemViewWidth = itemView.getMeasuredWidth();
         itemView.setX(this.barrageViewWidth);
-
-        //设置文字//设置图片
-        TextView tvContent = itemView.findViewById(R.id.tv_content);
-        tvContent.setText(barrageViewBean.getContent());
-        TextView tvTime = itemView.findViewById(R.id.tv_time);
-        tvTime.setText(barrageViewBean.getTime());
-
-        ImageView iv = itemView.findViewById(R.id.iv_headview);
-        Glide
-                .with(getContext())
-                .load(barrageViewBean.getHeadPictureUrl())
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .dontAnimate()
-                .override(100, 100)
-                .error(R.mipmap.ic_launcher_round)
-                .placeholder(R.mipmap.ic_launcher_round)
-                .transform(new GlideCircleTransform(getContext()))
-                .into(iv);
-
-        addView(itemView);
 
         if (linearInterpolator == null) {
             linearInterpolator = new LinearInterpolator();
@@ -159,19 +138,19 @@ public class BarrageView extends FrameLayout {
     /**
      * 获得随机的Y轴的值
      */
-    private float getItemRamdomY() {
-        int currentY;
+    private float getItemRandomY() {
 
         //随机选择弹幕出现的行数位置，跟上一条位置不同行
         int randomLine = lastLine;
-        while (randomLine == lastLine) {
-            randomLine = (int) (Math.random() * displayLines + 1);
+        if (displayLines > 1) {
+            while (randomLine == lastLine) {
+                randomLine = (int) (Math.random() * displayLines + 1);
+            }
         }
 
+        lastLine =randomLine ;
         //当前itemView y值
-        currentY = barrageViewHeight / displayLines * (randomLine - 1);
-        lastLine = randomLine;
-        return currentY;
+        return (float) (barrageViewHeight*1.0 / displayLines * (randomLine - 1));
     }
 
     @Override
@@ -188,8 +167,9 @@ public class BarrageView extends FrameLayout {
     }
 
     //设置数据
-    public void setData(List<BarrageViewBean> list) {
-        mBarrageViewBeanList = list;
+    public void setData(List<?> list, ViewHolder viewHolder) {
+        datas = list;
+        this.viewHolder = viewHolder;
     }
 
     public void start() {
@@ -213,8 +193,8 @@ public class BarrageView extends FrameLayout {
     public void cancle() {
         isStart = false;
         currentIndex = 0;
-        if (mBarrageViewBeanList != null) {
-            mBarrageViewBeanList.clear();
+        if (datas != null) {
+            datas.clear();
         }
         removeAllViews();
         handler.removeMessages(CODE_NEXT);
@@ -222,5 +202,111 @@ public class BarrageView extends FrameLayout {
 
     public void onDestroy() {
         cancle();
+    }
+
+
+    /**
+     * 获取显示行数
+     *
+     * @return 行数
+     */
+    public int getDisplayLines() {
+        return displayLines;
+    }
+
+    /**
+     * 设置显示行数
+     *
+     * @param displayLines 行数
+     */
+    public void setDisplayLines(int displayLines) {
+        if (displayLines <= 0) {
+            return;
+        }
+        this.displayLines = displayLines;
+    }
+
+    /**
+     * 是否重复
+     *
+     * @return 是否
+     */
+    public boolean isRepeat() {
+        return isRepeat;
+    }
+
+    /**
+     * 设置是否重复
+     *
+     * @param repeat 是否
+     */
+    public void setRepeat(boolean repeat) {
+        isRepeat = repeat;
+    }
+
+    /**
+     * 获取动画持续时间
+     *
+     * @return 时长ms
+     */
+    public long getAnimationTime() {
+        return animationTime;
+    }
+
+    /**
+     * 设置动画持续时长
+     *
+     * @param animationTime ms
+     */
+    public void setAnimationTime(long animationTime) {
+        this.animationTime = animationTime;
+    }
+
+
+    /**
+     * 获取最小间隔时间
+     *
+     * @return ms
+     */
+    public long getMinIntervalTime() {
+        return minIntervalTime;
+    }
+
+    /**
+     * 设置最小间间隔时间
+     *
+     * @param minIntervalTime ms
+     */
+    public void setMinIntervalTime(long minIntervalTime) {
+        if (minIntervalTime <= 0) {
+            return;
+        }
+        this.minIntervalTime = minIntervalTime;
+    }
+
+    /**
+     * 获取最大间隔时间
+     *
+     * @return ms
+     */
+    public long getMaxIntervalTime() {
+        return maxIntervalTime;
+    }
+
+    /**
+     * 设置最大间间隔时间
+     *
+     * @param maxIntervalTime ms
+     */
+    public void setMaxIntervalTime(long maxIntervalTime) {
+        if (maxIntervalTime <= 0) {
+            return;
+        }
+        this.maxIntervalTime = maxIntervalTime;
+    }
+
+
+    public interface ViewHolder {
+        View getItemView(Context context, Object item, int index);
     }
 }

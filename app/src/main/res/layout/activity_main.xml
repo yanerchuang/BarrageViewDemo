@@ -3,11 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#DFA91E"
     tools:context=".MainActivity">
 
     <com.ywj.barrageviewdemo.BarrageView
         android:id="@+id/barrageview"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp" />
 
 </LinearLayout>

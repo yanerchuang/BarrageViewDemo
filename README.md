@@ -8,4 +8,5 @@
     private long distanceTime = 3 * 1000L; //两条弹幕间隔时间
     private boolean isRandomDistanTime = true; //是否随机间隔时间
 ## Demo 图片
+![](pre/demo1.png)
 ![](pre/1.gif)
